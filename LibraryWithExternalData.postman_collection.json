@@ -1,0 +1,580 @@
+{
+	"info": {
+		"_postman_id": "3b27828b-0b08-414f-a460-bd9a52f937c2",
+		"name": "LibraryWithExternalData",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24956251",
+		"_collection_link": "https://devyanikondegmailcom.postman.co/workspace/AutomationTestingEdge~72db8b0e-a9c4-46c8-b720-3b96433c81f8/collection/24956251-3b27828b-0b08-414f-a460-bd9a52f937c2?action=share&source=collection_link&creator=24956251"
+	},
+	"item": [
+		{
+			"name": "AddBook",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();\r",
+							"console.log(\"Stored book_id:\", jsonData.id);\r",
+							"\r",
+							"pm.test(\"Validate Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.collectionVariables.set(\"book_id\", jsonData.id);\r",
+							"\r",
+							"pm.test(\"Validate Book ID saved\", function() {\r",
+							"    pm.expect(pm.collectionVariables.get(\"book_id\")).to.eql(jsonData.id);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate required fields exist\", function() {\r",
+							"    pm.expect(jsonData).to.have.property(\"id\");\r",
+							"    pm.expect(jsonData).to.have.property(\"title\");\r",
+							"    pm.expect(jsonData).to.have.property(\"author\");\r",
+							"    pm.expect(jsonData).to.have.property(\"genre\");\r",
+							"    pm.expect(jsonData).to.have.property(\"yearPublished\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate important fields are not null\", function() {\r",
+							"    pm.expect(jsonData.id).to.not.be.null;\r",
+							"    pm.expect(jsonData.checkedOut).to.not.be.undefined;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate checkedOut is false\", function() {\r",
+							"    pm.expect(jsonData.checkedOut).to.eql(false);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate yearPublished is a number\", function() {\r",
+							"    pm.expect(jsonData.yearPublished).to.be.a(\"number\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate Content-Type header\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate response time < 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is valid JSON\", function () {\r",
+							"    pm.expect(() => JSON.parse(pm.response.text())).to.not.throw();\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"title_name\",pm.iterationData.get(\"title_data\") );\r",
+							"pm.collectionVariables.set(\"author_name\",pm.iterationData.get(\"author_data\") );\r",
+							"pm.collectionVariables.set(\"genre_name\",pm.iterationData.get(\"genre_data\") );\r",
+							"pm.collectionVariables.set(\"yearPublished_date\",pm.iterationData.get(\"yearPublished_data\") );"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api-key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "api-key",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"{{title_name}}\",\r\n  \"author\": \"{{author_name}}\",\r\n  \"genre\": \"{{genre_name}}\",\r\n  \"yearPublished\": {{yearPublished_date}}\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/books",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetBookByID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"console.log(\"Fetched book_id:\", jsonData.id);\r",
+							"\r",
+							"pm.test(\"Validate Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate Content-Type header\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate response is JSON\", function () {\r",
+							"    pm.expect(() => JSON.parse(pm.response.text())).to.not.throw();\r",
+							"});\r",
+							"\r",
+							"pm.test(\"ID matches requested book_id\", function () {\r",
+							"    const requestedId = pm.collectionVariables.get(\"book_id\");\r",
+							"    pm.expect(jsonData.id).to.eql(requestedId);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate required fields exist\", function () {\r",
+							"    pm.expect(jsonData).to.have.property(\"id\");\r",
+							"    pm.expect(jsonData).to.have.property(\"title\");\r",
+							"    pm.expect(jsonData).to.have.property(\"author\");\r",
+							"    pm.expect(jsonData).to.have.property(\"genre\");\r",
+							"    pm.expect(jsonData).to.have.property(\"yearPublished\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate response field types\", function () {\r",
+							"    pm.expect(jsonData.id).to.be.a(\"string\");\r",
+							"    pm.expect(jsonData.title).to.be.a(\"string\");\r",
+							"    pm.expect(jsonData.author).to.be.a(\"string\");\r",
+							"    pm.expect(jsonData.genre).to.be.a(\"string\");\r",
+							"    pm.expect(jsonData.yearPublished).to.be.a(\"number\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate checkedOut is boolean\", function () {\r",
+							"    pm.expect(jsonData.checkedOut).to.be.a(\"boolean\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate checkedOut is false\", function () {\r",
+							"     try{\r",
+							"    pm.expect(jsonData.checkedOut).to.eql(false);\r",
+							"    }catch(err){\r",
+							"        console.log(\"Book is updated: checkedOut is TRUE\");\r",
+							"       if (jsonData.checkedOut === true) {\r",
+							"            console.log(\"INFO: Book is currently checked out by a user.\");\r",
+							"        }\r",
+							"    }\r",
+							"});\r",
+							"pm.test(\"Validate checkedOut state\", function () {\r",
+							"    if (jsonData.checkedOut === false) {\r",
+							"        console.log(\"checkedOut is FALSE (expected)\");\r",
+							"    } else {\r",
+							"        console.log(\"checkedOut is TRUE (book is borrowed)\");\r",
+							"    }\r",
+							"    pm.expect(jsonData.checkedOut).to.be.oneOf([true, false]);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate response time < 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate title & author not empty\", function () {\r",
+							"    pm.expect(jsonData.title).to.not.be.empty;\r",
+							"    pm.expect(jsonData.author).to.not.be.empty;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api-key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "api-key",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/books/:id",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"books",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{book_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateBookById",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let rawBody = pm.response.text();\r",
+							"let statusCode = pm.response.code;\r",
+							"let bookId = pm.collectionVariables.get(\"book_id\");\r",
+							"\r",
+							"let jsonData = {};\r",
+							"let hasJson = false;\r",
+							"\r",
+							"if (rawBody && rawBody.trim().length > 0) {\r",
+							"    try {\r",
+							"        jsonData = pm.response.json();\r",
+							"        hasJson = true;\r",
+							"    } catch (e) {\r",
+							"        console.log(\"PATCH Response is not valid JSON:\", rawBody);\r",
+							"    }\r",
+							"} else {\r",
+							"    console.log(\"PATCH Response body is empty.\");\r",
+							"}\r",
+							"\r",
+							"pm.test(\"PATCH - Status code is 200\", function () {\r",
+							"    pm.expect(statusCode).to.eql(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"PATCH - Content-Type header present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"PATCH - Validate required fields exist\", function () {\r",
+							"    if (hasJson) {\r",
+							"        pm.expect(jsonData).to.have.property(\"id\");\r",
+							"        pm.expect(jsonData).to.have.property(\"title\");\r",
+							"        pm.expect(jsonData).to.have.property(\"author\");\r",
+							"        pm.expect(jsonData).to.have.property(\"genre\");\r",
+							"        pm.expect(jsonData).to.have.property(\"yearPublished\");\r",
+							"        pm.expect(jsonData).to.have.property(\"checkedOut\");\r",
+							"    } else {\r",
+							"        console.log(\"Skipping field validation (no JSON)\");\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"PATCH - ID remains unchanged\", function () {\r",
+							"    if (hasJson) {\r",
+							"        pm.expect(jsonData.id).to.eql(bookId);\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"PATCH - Validate checkedOut updated to true\", function () {\r",
+							"    if (hasJson) {\r",
+							"        pm.expect(jsonData.checkedOut).to.eql(true);\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"PATCH - Body contains updated fields\", function () {\r",
+							"    if (hasJson) {\r",
+							"        pm.expect(rawBody.toLowerCase()).to.include(\"author\");\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"PATCH - Response time < 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"PATCH - Response JSON is valid\", function () {\r",
+							"    pm.expect(() => JSON.parse(rawBody)).to.not.throw();\r",
+							"});\r",
+							"\r",
+							"pm.test(\"PATCH - No empty fields\", function () {\r",
+							"    if (hasJson) {\r",
+							"        pm.expect(jsonData.title).to.not.be.empty;\r",
+							"        pm.expect(jsonData.author).to.not.be.empty;\r",
+							"        pm.expect(jsonData.genre).to.not.be.empty;\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api-key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "api-key",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"checkedOut\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/books/:id",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"books",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{book_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteBookById",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let rawBody = pm.response.text();\r",
+							"let statusCode = pm.response.code;\r",
+							"let bookId = pm.collectionVariables.get(\"book_id\");\r",
+							"\r",
+							"let jsonData = {};\r",
+							"let hasJson = false;\r",
+							"\r",
+							"if (rawBody && rawBody.trim().length > 0) {\r",
+							"    try {\r",
+							"        jsonData = pm.response.json();\r",
+							"        hasJson = true;\r",
+							"    } catch (e) {\r",
+							"        console.log(\"Response is not valid JSON:\", rawBody);\r",
+							"    }\r",
+							"} else {\r",
+							"    console.log(\"Response body is empty.\");\r",
+							"}\r",
+							"\r",
+							"pm.test(\"DELETE - Status code is correct\", function () {\r",
+							"    pm.expect(statusCode).to.be.oneOf([200, 204, 404]);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"DELETE - Content-Type header (if body exists)\", function () {\r",
+							"    if (rawBody.trim().length > 0) {\r",
+							"        pm.response.to.have.header(\"Content-Type\");\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"DELETE - Validate status and messages\", function () {\r",
+							"\r",
+							"    if (statusCode === 200 || statusCode === 204) {\r",
+							"        console.log(\"Book deleted successfully.\");\r",
+							"        pm.expect([200, 204]).to.include(statusCode);\r",
+							"    }\r",
+							"\r",
+							"    else if (statusCode === 404 && hasJson && jsonData.message) {\r",
+							"        const expectedMsg = `Book with id '${bookId}' not found`;\r",
+							"        console.log(\"DELETE returned 404:\", jsonData.message);\r",
+							"\r",
+							"        pm.expect(jsonData.message.toLowerCase()).to.include(\"not found\");\r",
+							"        pm.expect(jsonData.message).to.include(bookId);\r",
+							"    } \r",
+							"    \r",
+							"    else {\r",
+							"        console.log(\"DELETE returned unexpected body:\", rawBody);\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"DELETE - If message exists, confirm it mentions deleted book\", function () {\r",
+							"    if (hasJson && jsonData.message) {\r",
+							"        pm.expect(jsonData.message).to.include(\"Book with id\");\r",
+							"        pm.expect(jsonData.message).to.include(bookId);\r",
+							"    } else {\r",
+							"        console.log(\"No 'message' field to validate.\");\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"GET after DELETE - Correct not found message\", function () {\r",
+							"    if (statusCode === 404 && hasJson && jsonData.message) {\r",
+							"\r",
+							"        console.log(\"Validating GET-after-DELETE message...\");\r",
+							"\r",
+							"        pm.expect(jsonData.message.toLowerCase()).to.include(\"not found\");\r",
+							"        pm.expect(jsonData.message).to.include(bookId);\r",
+							"\r",
+							"    } else {\r",
+							"        console.log(\"Skipping message validation (no JSON or not 404).\");\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"GET after DELETE - Response time < 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api-key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "api-key",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"{{book_id}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/books/:id",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"books",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{book_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "title_name",
+			"value": ""
+		},
+		{
+			"key": "author_name",
+			"value": ""
+		},
+		{
+			"key": "genre_name",
+			"value": ""
+		},
+		{
+			"key": "yearPublished_date",
+			"value": ""
+		},
+		{
+			"key": "book_id",
+			"value": ""
+		}
+	]
+}

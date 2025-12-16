@@ -1,0 +1,13 @@
+npm install -g newman
+npm i -g newman-reporter-htmlextra
+
+cd <path of your folder>
+newman run LibraryWithExternalData.postman_collection.json -e QA.postman_environment.json
+newman run LibraryWithExternalData.postman_collection.json -e QA.postman_environment.json -d book_api.csv
+newman run LibraryWithExternalData.postman_collection.json -e QA.postman_environment.json -d book_api.csv -g globalfilename.json
+
+newman run LibraryWithExternalData.postman_collection.json -e QA.postman_environment.json -d book_api.csv -r htmlextra
+
+
+
+
